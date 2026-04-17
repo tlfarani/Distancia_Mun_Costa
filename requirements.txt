@@ -2,3 +2,5 @@ streamlit
 geopandas
 shapely
 pyproj
+pyarrow
+fastparquet
