@@ -65,23 +65,29 @@ else:
             dados_linha,
             get_source_position="start",
             get_target_position="end",
-            get_color=[230, 0, 0, 255], # Vermelho sólido
-            get_width=5,
+            get_color=[230, 0, 0, 255],
+            get_width=3,            # Largura da linha um pouco mais fina para estética
+            width_units="pixels",   # Também fixa a largura da linha em pixels
         )
 
         # Camada de Pontos com nomes para o Tooltip
+        # Camada de Pontos com tamanho em pixels para escala dinâmica
         dados_pontos = pd.DataFrame([
-            {"lon": user_lon, "lat": user_lat, "local": "Ponto de Origem", "cor": [0, 0, 255]}, # Azul
-            {"lon": ponto_costa_geo.x, "lat": ponto_costa_geo.y, "local": f"Costa: {resultado['NM_MUN']}", "cor": [0, 150, 0]} # Verde
+            {"lon": user_lon, "lat": user_lat, "local": "Ponto de Origem", "cor": [0, 0, 255]}, 
+            {"lon": ponto_costa_geo.x, "lat": ponto_costa_geo.y, "local": f"Costa: {resultado['NM_MUN']}", "cor": [0, 150, 0]}
         ])
-
+        
         layer_pontos = pdk.Layer(
             "ScatterplotLayer",
             dados_pontos,
             get_position="[lon, lat]",
             get_fill_color="cor",
-            get_radius=800,
-            pickable=True, # Necessário para o tooltip funcionar
+            # Alterações aqui:
+            get_radius=8,           # Tamanho base em pixels
+            radius_units="pixels",  # Faz com que o ponto use pixels da tela, não metros no mapa
+            radius_min_pixels=5,    # Garante que ele não suma ao tirar muito o zoom
+            radius_max_pixels=15,   # Garante que ele não cresça demais ao dar muito zoom
+            pickable=True,
         )
 
         # Estado inicial da visão (centralizado entre os pontos)
@@ -94,12 +100,12 @@ else:
 
         # Renderização do Mapa
         st.pydeck_chart(pdk.Deck(
-            map_style="light", # Estilo simplificado sem necessidade de token complexo
+            map_style=None, # Usa o padrão do sistema se o estilo 'light' falhar
             initial_view_state=view_state,
             layers=[layer_linha, layer_pontos],
             tooltip={
-                "html": "<b>Localização:</b> {local}",
-                "style": {"backgroundColor": "steelblue", "color": "white"}
+                "html": "<b>{local}</b>",
+                "style": {"backgroundColor": "steelblue", "color": "white", "fontSize": "12px"}
             }
         ))
 
