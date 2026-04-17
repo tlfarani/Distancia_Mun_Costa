@@ -114,6 +114,6 @@ else:
     st.sidebar.markdown("---")
     st.sidebar.markdown(
         """
-        **Desenvolvido por:** [Seu Nome Aqui]  
-        *Analista Ambiental - IBAMA/Ceneac* """
+        **Desenvolvido por:** Tiago Luz Farani  
+        *Analista Ambiental - IBAMA - Nupaem/SP* """
     )
