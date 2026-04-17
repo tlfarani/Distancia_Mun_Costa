@@ -59,15 +59,19 @@ else:
             "start": [user_lon, user_lat],
             "end": [ponto_costa_geo.x, ponto_costa_geo.y]
         }]
-        
+                
+        # Camada de Linha corrigida para evitar o efeito de "bloco"
         layer_linha = pdk.Layer(
             "LineLayer",
             dados_linha,
             get_source_position="start",
             get_target_position="end",
-            get_color=[230, 0, 0, 255],
-            get_width=3,            # Largura da linha um pouco mais fina para estética
-            width_units="pixels",   # Também fixa a largura da linha em pixels
+            get_color=[230, 0, 0, 200], # Vermelho com leve transparência
+            get_width=2,                # Valor base da largura
+            width_units="pixels",       # Define a unidade como pixels
+            width_min_pixels=2,         # Força a largura mínima em 2px (não some ao tirar o zoom)
+            width_max_pixels=2,         # Força a largura máxima em 2px (não vira um bloco ao dar zoom)
+            pickable=True,
         )
 
         # Camada de Pontos com nomes para o Tooltip
