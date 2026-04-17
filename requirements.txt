@@ -1,6 +1,5 @@
 streamlit
 geopandas
+pandas
 shapely
-pyproj
 pyarrow
-fastparquet
