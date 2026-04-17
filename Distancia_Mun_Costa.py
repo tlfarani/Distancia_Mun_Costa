@@ -109,3 +109,11 @@ else:
             layers=[layer_linha, layer_pontos],
             tooltip={"html": "<b>{local}</b>"}
         ))
+
+    # Adicione isso ao final do seu bloco da barra lateral (st.sidebar)
+    st.sidebar.markdown("---")
+    st.sidebar.markdown(
+        """
+        **Desenvolvido por:** [Seu Nome Aqui]  
+        *Analista Ambiental - IBAMA/Ceneac* """
+    )
