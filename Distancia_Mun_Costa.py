@@ -1,68 +1,60 @@
-# -*- coding: utf-8 -*-
-
 import streamlit as st
 import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point
 import os
 
-st.set_page_config(page_title="Calculador de Proximidade Costeira", layout="wide")
+st.set_page_config(page_title="Calculador Costeiro IBAMA", layout="wide")
 
 st.title("📏 Cálculo de Menor Distância à Costa")
-st.write("Determine o município costeiro mais próximo de qualquer ponto.")
 
-# Função para carregar os dados (com cache para ser instantâneo após o primeiro load)
 @st.cache_data
-def carregar_dados(caminho_shp):
-    # O geopandas lê o .shp mas precisa do .dbf e .shx na mesma pasta
-    gdf = gpd.read_file(caminho_shp)
-    # Garante que o sistema de coordenadas original é WGS84 (Lat/Lon)
+def carregar_dados():
+    # Lendo o Parquet (muito mais rápido e leve)
+    gdf = gpd.read_parquet("Munic_Mar_Sud_Pontos.parquet")
     if gdf.crs is None:
         gdf.set_crs(epsg=4326, inplace=True)
     return gdf
 
-# Caminho para o seu arquivo
-arquivo_shp = "Munic_Mar_Sud_Pontos.shp"
-
-if not os.path.exists(arquivo_shp):
-    st.error(f"Erro: O ficheiro '{arquivo_shp}' não foi encontrado. Verifique se os ficheiros .shp, .shx e .dbf estão na mesma pasta.")
+if not os.path.exists("Munic_Mar_Sud_Pontos.parquet"):
+    st.error("Arquivo 'Munic_Mar_Sud_Pontos.parquet' não encontrado. Converta o shapefile primeiro!")
 else:
-    gdf_costa = carregar_dados(arquivo_shp)
+    gdf_costa = carregar_dados()
 
-    # Sidebar para entrada de coordenadas
-    st.sidebar.header("Coordenadas do Ponto")
-    user_lat = st.sidebar.number_input("Latitude (ex: -23.01)", format="%.6f", value=-23.0)
-    user_lon = st.sidebar.number_input("Longitude (ex: -43.15)", format="%.6f", value=-43.0)
+    # Inputs
+    st.sidebar.header("Coordenadas de Entrada")
+    user_lat = st.sidebar.number_input("Latitude", format="%.6f", value=-23.0)
+    user_lon = st.sidebar.number_input("Longitude", format="%.6f", value=-43.0)
 
-    if st.sidebar.button("Calcular"):
-        # 1. Criar o ponto do utilizador e projetar para métrico (EPSG:5880)
-        # Usamos 5880 para garantir que o cálculo da distância em metros seja preciso no Brasil
+    if st.sidebar.button("Calcular Ponto mais Próximo"):
+        # 1. Projeção métrica para cálculo preciso em KM (SIRGAS 2000 Polyconic)
         ponto_usuario = gpd.GeoSeries([Point(user_lon, user_lat)], crs="EPSG:4326").to_crs(epsg=5880).iloc[0]
-        
-        # 2. Projetar o shapefile da costa para o mesmo sistema métrico
         gdf_proj = gdf_costa.to_crs(epsg=5880)
 
-        # 3. Calcular a distância de todos os pontos da costa ao ponto do utilizador
+        # 2. Cálculo da distância
         distancias = gdf_proj.distance(ponto_usuario)
-        
-        # 4. Encontrar o índice da menor distância
         idx_minimo = distancias.idxmin()
-        menor_distancia_km = distancias.min() / 1000
+        distancia_km = distancias.min() / 1000
         
-        # 5. Recuperar os dados do ponto mais próximo
+        # 3. Pegar a linha correspondente no dado original
         resultado = gdf_costa.iloc[idx_minimo]
         
-        # Exibição dos resultados
-        st.success(f"### Distância calculada: {menor_distancia_km:.2f} km")
-        
+        st.success(f"### Distância: {distancia_km:.2f} km")
+
+        # 4. Exibição Inteligente (Tenta achar a coluna certa)
         col1, col2 = st.columns(2)
+        
+        # Procura por colunas que contenham 'MUN' ou 'UF'
+        col_mun = [c for c in gdf_costa.columns if 'MUN' in c.upper()]
+        col_uf = [c for c in gdf_costa.columns if 'UF' in c.upper() or 'ESTADO' in c.upper()]
+
         with col1:
-            st.metric("Município", resultado.get('NM_MUN', 'Não encontrado')) # Ajuste 'NM_MUN' se o nome da coluna for diferente
+            valor_mun = resultado[col_mun[0]] if col_mun else "Não encontrada"
+            st.metric("Município da Costa", valor_mun)
         with col2:
-            st.metric("UF", resultado.get('SIGLA_UF', 'Não encontrado'))
+            valor_uf = resultado[col_uf[0]] if col_uf else "Não encontrada"
+            st.metric("UF", valor_uf)
 
-        # Mostrar mapa simples
-        df_mapa = pd.DataFrame({'lat': [user_lat], 'lon': [user_lon]})
-        st.map(df_mapa)
-
-st.info("Nota técnica: O cálculo utiliza a distância euclidiana (linha reta) após projeção para o sistema SIRGAS 2000 / Brazil Polyconic.")
+        # Mostra os dados brutos da linha encontrada para conferência
+        with st.expander("Ver detalhes do ponto encontrado no Shapefile"):
+            st.write(resultado.drop('geometry'))
