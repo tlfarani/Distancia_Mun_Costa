@@ -46,17 +46,21 @@ if tipo_input == "Decimal":
     user_lat = st.sidebar.number_input("Latitude (ex: -23.123)", format="%.6f", value=-23.5000)
     user_lon = st.sidebar.number_input("Longitude (ex: -42.123)", format="%.6f", value=-43.0000)
 else:
+    # --- BLOCO LATITUDE ---
+    st.sidebar.subheader("Latitude")
     col_lat1, col_lat2, col_lat3 = st.sidebar.columns(3)
-    lat_g = col_lat1.number_input("Lat G", value=23, step=1)
-    lat_m = col_lat2.number_input("M", value=0, step=1)
-    lat_s = col_lat3.number_input("S", value=0.0, format="%.2f")
-    lat_dir = st.sidebar.selectbox("Dir Lat", ["S", "N"], index=0)
+    lat_g = col_lat1.number_input("G", value=23, step=1, key="lat_g_input")
+    lat_m = col_lat2.number_input("M", value=0, step=1, key="lat_m_input")
+    lat_s = col_lat3.number_input("S", value=0.0, format="%.2f", key="lat_s_input")
+    lat_dir = st.sidebar.selectbox("Direção Lat", ["S", "N"], index=0, key="lat_dir_input")
     
+    # --- BLOCO LONGITUDE ---
+    st.sidebar.subheader("Longitude")
     col_lon1, col_lon2, col_lon3 = st.sidebar.columns(3)
-    lon_g = col_lon1.number_input("Lon G", value=43, step=1)
-    lon_m = col_lon2.number_input("M", value=0, step=1)
-    lon_s = col_lon3.number_input("S", value=0.0, format="%.2f")
-    lon_dir = st.sidebar.selectbox("Dir Lon", ["W", "E"], index=0)
+    lon_g = col_lon1.number_input("G", value=43, step=1, key="lon_g_input")
+    lon_m = col_lon2.number_input("M", value=0, step=1, key="lon_m_input")
+    lon_s = col_lon3.number_input("S", value=0.0, format="%.2f", key="lon_s_input")
+    lon_dir = st.sidebar.selectbox("Direção Lon", ["W", "E"], index=0, key="lon_dir_input")
 
     user_lat = gms_para_decimal(lat_g, lat_m, lat_s, lat_dir)
     user_lon = gms_para_decimal(lon_g, lon_m, lon_s, lon_dir)
