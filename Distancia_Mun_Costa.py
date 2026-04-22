@@ -19,9 +19,9 @@ def gms_para_decimal(graus, minutos, segundos, direcao):
 # --- CARREGAMENTO DE DADOS (CACHE) ---
 @st.cache_data
 def carregar_dados():
-    if not os.path.exists("costa_brasil_2024.parquet"):
+    if not os.path.exists("costa_brasil_otimizada.parquet"):
         return None
-    gdf = gpd.read_parquet("costa_brasil_2024.parquet")
+    gdf = gpd.read_parquet("costa_brasil_otimizada.parquet")
     if gdf.crs is None:
         gdf.set_crs(epsg=4326, inplace=True)
     return gdf
@@ -35,7 +35,7 @@ Esta ferramenta calcula a menor distância entre um ponto e a linha de costa de 
 gdf_costa = carregar_dados()
 
 if gdf_costa is None:
-    st.error("Erro: Arquivo 'costa_brasil_2024.parquet' não encontrado. Execute o script de preparação primeiro.")
+    st.error("Erro: Arquivo 'costa_brasil_otimizada.parquet' não encontrado. Execute o script de preparação primeiro.")
     st.stop()
 
 # --- BARRA LATERAL ---
