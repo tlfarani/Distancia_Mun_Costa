@@ -86,7 +86,7 @@ if calcular:
     m1, m2, m3 = st.columns(3)
     m1.metric("Distância", f"{distancia_km:.2f} km")
     m2.metric("Município", str(municipio_alvo['NM_MUN']))
-    m3.metric("UF", str(municipio_alvo['SIGLA']))
+    m3.metric("UF", str(municipio_alvo['SIGLA_UF']))
 
     # --- MAPA PYDECK ---
     dados_linha = [{"start": [user_lon, user_lat], "end": [ponto_costa_geo.x, ponto_costa_geo.y]}]
