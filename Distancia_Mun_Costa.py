@@ -106,10 +106,21 @@ if calcular:
         {"lon": ponto_costa_geo.x, "lat": ponto_costa_geo.y, "local": f"Ponto na Costa ({municipio_alvo['NM_MUN']})", "cor": [0, 200, 0]}
     ])
 
+    #layer_pontos = pdk.Layer(
+     #   "ScatterplotLayer", dados_pontos,
+      #  get_position="[lon, lat]", get_fill_color="cor",
+       # get_radius=10, radius_units="pixels", pickable=True,
+    #)
+
     layer_pontos = pdk.Layer(
-        "ScatterplotLayer", dados_pontos,
-        get_position="[lon, lat]", get_fill_color="cor",
-        get_radius=10, radius_units="pixels", pickable=True,
+        "ScatterplotLayer", 
+        dados_pontos,
+        get_position="[lon, lat]", 
+        get_fill_color="cor",
+        get_radius=1000,          # Raio base em metros (pode ajustar se necessário)
+        radius_min_pixels=6,      # Garante que o ponto não suma ao afastar o zoom (tamanho mínimo)
+        radius_max_pixels=15,     # Impede que o ponto cubra a tela ao aproximar (tamanho máximo)
+        pickable=True,
     )
 
     view_state = pdk.ViewState(
