@@ -106,12 +106,6 @@ if calcular:
         {"lon": ponto_costa_geo.x, "lat": ponto_costa_geo.y, "local": f"Ponto na Costa ({municipio_alvo['NM_MUN']})", "cor": [0, 200, 0]}
     ])
 
-    #layer_pontos = pdk.Layer(
-     #   "ScatterplotLayer", dados_pontos,
-      #  get_position="[lon, lat]", get_fill_color="cor",
-       # get_radius=10, radius_units="pixels", pickable=True,
-    #)
-
     layer_pontos = pdk.Layer(
         "ScatterplotLayer", 
         dados_pontos,
