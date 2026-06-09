@@ -7,7 +7,15 @@ import pydeck as pdk
 import os
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(page_title="Calculador Costeiro Nacional - IBAMA", layout="wide")
+st.set_page_config(page_title="APRUMAR - IBAMA", layout="wide")
+
+# --- INTERFACE PRINCIPAL ---
+st.title("⚓ APRUMAR")
+st.subheader("Análise de Proximidade Marítima e Resposta Ambiental")
+st.markdown("""
+Esta ferramenta realiza o cruzamento espacial de coordenadas para identificar a menor distância à linha de costa 
+(IBGE 2024) e a bacia sedimentar correspondente (ANP), apoiando o planejamento de contingências e monitoramento offshore.
+""")
 
 # --- FUNÇÃO AUXILIAR DE CONVERSÃO ---
 def gms_para_decimal(graus, minutos, segundos, direcao):
