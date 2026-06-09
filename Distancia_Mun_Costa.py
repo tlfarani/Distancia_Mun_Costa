@@ -26,6 +26,15 @@ def carregar_dados():
         gdf.set_crs(epsg=4326, inplace=True)
     return gdf
 
+@st.cache_data
+def carregar_bacias():
+    if not os.path.exists("bacias_sedimentares_otimizadas.parquet"):
+        return None
+    gdf = gpd.read_parquet("bacias_sedimentares_otimizadas.parquet")
+    if gdf.crs is None:
+        gdf.set_crs(epsg=4326, inplace=True)
+    return gdf
+    
 # --- INTERFACE PRINCIPAL ---
 st.title("📏 Distância à Costa Brasileira (IBGE 2024)")
 st.markdown("""
@@ -33,6 +42,12 @@ Esta ferramenta calcula a menor distância entre um ponto e a linha de costa de 
 """)
 
 gdf_costa = carregar_dados()
+
+gdf_bacias = carregar_bacias()
+
+if gdf_bacias is None:
+    st.error("Erro: Arquivo 'bacias_sedimentares_otimizadas.parquet' não encontrado.")
+    st.stop()
 
 if gdf_costa is None:
     st.error("Erro: Arquivo 'costa_brasil_otimizada.parquet' não encontrado. Execute o script de preparação primeiro.")
@@ -85,12 +100,24 @@ if calcular:
     gs_dist_proj = gs_dist.to_crs(epsg=5880)
     distancia_km = gs_dist_proj[0].distance(gs_dist_proj[1]) / 1000
 
-    # --- RESULTADOS ---
+    # --- IDENTIFICAÇÃO DA BACIA SEDIMENTAR ---
+    # Consulta o índice espacial para ver qual polígono intersecta o ponto do acidente
+    indices_bacia = gdf_bacias.sindex.query(ponto_usuario_geo, predicate="intersects")
+    
+    if len(indices_bacia) > 0:
+        # Seleciona a primeira bacia coincidente encontrada
+        bacia_alvo = gdf_bacias.iloc[indices_bacia[0]]
+        nome_bacia = str(bacia_alvo['name']).strip()
+    else:
+        nome_bacia = "Fora de Bacia Mapeada"
+
+    # --- RESULTADOS EXIBIDOS NA TELA ---
     st.success("### 📍 Resultado")
-    m1, m2, m3 = st.columns(3)
+    m1, m2, m3, m4 = st.columns(4)  # Dividido em 4 colunas paralelas
     m1.metric("Distância", f"{distancia_km:.2f} km")
     m2.metric("Município", str(municipio_alvo['NM_MUN']))
     m3.metric("UF", str(municipio_alvo['SIGLA_UF']))
+    m4.metric("Bacia Sedimentar", nome_bacia)
 
     # --- MAPA PYDECK ---
     dados_linha = [{"start": [user_lon, user_lat], "end": [ponto_costa_geo.x, ponto_costa_geo.y]}]
