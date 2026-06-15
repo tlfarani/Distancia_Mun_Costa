@@ -7,7 +7,7 @@ import pydeck as pdk
 import os
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(page_title="APRUMAR - IBAMA", layout="wide")
+st.set_page_config(page_title="ProMar - IBAMA", layout="wide")
 
 # --- CUSTOMIZAÇÃO DE CORES (Verde Escuro, Cinza Claro e Branco) ---
 st.markdown("""
@@ -75,7 +75,7 @@ if gdf_costa is None or gdf_bacias is None:
     st.stop()
 
 # --- INTERFACE PRINCIPAL ---
-st.title("⚓ APRUMAR")
+st.title("⚓ ProMar")
 st.subheader("Análise de Proximidade Marítima e Resposta Ambiental")
 st.markdown("""
 Ferramenta espacial para cálculo da menor distância entre um ponto de incidente e a linha de costa brasileira (IBGE 2024), 
